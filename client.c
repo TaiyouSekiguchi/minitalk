@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 10:47:56 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/02 10:55:14 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/02 11:06:38 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int	main(int argc, char *argv[])
 					return (1);
 			}
 			bit >>= 1;
-			usleep(100000);
+			usleep(100);
 		}
 		printf("\n");
 		i++;
@@ -75,7 +75,7 @@ int	main(int argc, char *argv[])
 				return (1);
 		}
 		bit >>= 1;
-		usleep(100000);
+		usleep(100);
 	}
 
 	return (0);
