@@ -6,22 +6,17 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/01 16:51:40 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:08:14 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <string.h>
+#include "server.h"
 
 volatile sig_atomic_t	g_recieve_signal;
 
 static void	handle_signal(int signal)
 {
 	g_recieve_signal = signal;
-	printf("signal get\n");
 }
 
 static void	recieve_bit(char *str, int g_recieve_signal)
@@ -30,7 +25,6 @@ static void	recieve_bit(char *str, int g_recieve_signal)
 	static int				count;
 	static int				i;
 
-	printf("in recieve_bit\n");
 	if (g_recieve_signal == SIGUSR1)
 	{
 		uc |= 0;
@@ -39,12 +33,9 @@ static void	recieve_bit(char *str, int g_recieve_signal)
 	{
 		uc |= 1;
 	}
-	printf("%d\n", uc);
-	uc <<= 1;
-	count++;
-	if (count == 8)
+
+	if (count == 7)
 	{
-		uc >>= 1;
 		str[i] = (char)uc;
 		printf("%c\n", str[i]);
 		if (str[i] == 0x04)
@@ -52,10 +43,14 @@ static void	recieve_bit(char *str, int g_recieve_signal)
 			printf("%s\n", str);
 			exit(0);
 		}
-		i++;
 		uc = 0;
 		count = 0;
+		i++;
+		return ;
 	}
+
+	uc <<= 1;
+	count++;
 }
 
 static void	exit_server(char *str)
@@ -107,7 +102,6 @@ int	main(void)
 
 	while (1)
 	{
-		printf("in while loop\n");
 		if (g_recieve_signal == SIGUSR1 || g_recieve_signal == SIGUSR2)
 			recieve_bit(str, g_recieve_signal);
 		if (g_recieve_signal == SIGQUIT || g_recieve_signal == SIGINT)
