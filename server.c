@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/09/13 11:37:37 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:51:40 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,63 +16,104 @@
 #include <signal.h>
 #include <string.h>
 
-volatile sig_atomic_t	sigint_count = 3;
+volatile sig_atomic_t	g_recieve_signal;
 
-void	sigusr1_handler(int signum)
+static void	handle_signal(int signal)
 {
-	static unsigned char	tmp;
-	static size_t			cnt;
-
-	tmp = tmp | 0;
-	if (cnt == 8)
-	{
-		printf("%c", tmp);
-		tmp = 0;
-		cnt = 0;
-	}
-	tmp <<= 1;
-	cnt++;
+	g_recieve_signal = signal;
+	printf("signal get\n");
 }
 
-void	sigusr2_handler(int signum)
+static void	recieve_bit(char *str, int g_recieve_signal)
 {
-	static unsigned char	tmp;
-	static size_t			cnt;
+	static unsigned char	uc;
+	static int				count;
+	static int				i;
 
-	tmp = tmp | 1;
-	if (cnt == 8)
+	printf("in recieve_bit\n");
+	if (g_recieve_signal == SIGUSR1)
 	{
-		printf("%c", tmp);
-		tmp = 0;
-		cnt = 0;
+		uc |= 0;
 	}
-	tmp <<= 1;
-	cnt++;
+	else if (g_recieve_signal == SIGUSR2)
+	{
+		uc |= 1;
+	}
+	printf("%d\n", uc);
+	uc <<= 1;
+	count++;
+	if (count == 8)
+	{
+		uc >>= 1;
+		str[i] = (char)uc;
+		printf("%c\n", str[i]);
+		if (str[i] == 0x04)
+		{
+			printf("%s\n", str);
+			exit(0);
+		}
+		i++;
+		uc = 0;
+		count = 0;
+	}
+}
+
+static void	exit_server(char *str)
+{
+	free(str);
+	exit(0);
 }
 
 int	main(void)
 {
-	struct sigaction sa_sigint;
+	struct sigaction	sa;
+	sigset_t			block;
+	int					ret;
+	char				*str;
 
-	memset(&sa_sigint, 0, sizeof(sa_sigint));
-	sa_sigint.sa_handler = sigint_handler;
-	sa_sigint.sa_flags = SA_RESTART;
+	ret = sigemptyset(&block);
+	if (ret < 0)
+		return (1);
+	ret = sigaddset(&block, SIGUSR1);
+	if (ret < 0)
+		return (1);
+	ret = sigaddset(&block, SIGUSR2);
+	if (ret < 0)
+		return (1);
 
-	printf("PID is [%ld]\n", (long)getpid());
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = &handle_signal;
+	sa.sa_mask = block;
+	sa.sa_flags = SA_RESTART;
 
-	if (sigaction(SIGUSR1, &sa_sigint, NULL) < 0)
+	if (sigaction(SIGUSR1, &sa, NULL) < 0)
 	{
 		perror("sigaction");
 		exit(1);
 	}
 
-	for(;;)
+	if (sigaction(SIGUSR2, &sa, NULL) < 0)
 	{
-		printf("\nMAIN : sigint_count(%d), calling pause...\n", sigint_count);
-
-		pause();
-
-		printf("\nMAIN : returned from pause.sigint_count(%d)\n", sigint_count);
+		perror("sigaction");
+		exit(1);
 	}
+
+	printf("PID is [%ld]\n", (long)getpid());
+
+	str = (char *)malloc(sizeof(char) * 10);
+	if (str == NULL)
+		return (1);
+	memset(str, 0, 10);
+
+	while (1)
+	{
+		printf("in while loop\n");
+		if (g_recieve_signal == SIGUSR1 || g_recieve_signal == SIGUSR2)
+			recieve_bit(str, g_recieve_signal);
+		if (g_recieve_signal == SIGQUIT || g_recieve_signal == SIGINT)
+			exit_server(str);
+		pause();
+	}
+
 	return (0);
 }
