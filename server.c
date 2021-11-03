@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/03 10:09:10 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/03 11:01:28 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,40 +19,38 @@ static void	handle_signal(int signal)
 	g_recieve_signal = signal;
 }
 
-char	*str_resize(char *str, size_t size)
+char	*buf_resize(char *buf, size_t buf_size)
 {
 	char	*ret;
 	size_t	resize;
 	size_t	i;
 
-	if (str == NULL)
+	if (buf == NULL)
 		return (NULL);
 
-	if (SIZE_MAX - size < size)
+	if (SIZE_MAX - buf_size <= buf_size)
 	{
-		free(str);
+		free(buf);
 		return (NULL);
 	}
-	resize = size * 2;
+	resize = buf_size * 2;
 	ret = (char *)malloc(sizeof(char) * resize);
 	if (ret == NULL)
 	{
-		free(str);
+		free(buf);
 		return (NULL);
 	}
-	memset(ret, '\0', resize);
 	i = 0;
-	while (i < size)
+	while (i < buf_size)
 	{
-		ret[i] = str[i];
+		ret[i] = buf[i];
 		i++;
 	}
-	ret[i] = '\0';
-	//free(str);
+	free(buf);
 	return (ret);
 }
 
-static void	recieve_bit(char *str, size_t *size, int g_recieve_signal)
+static void	recieve_bit(char **buf, size_t *buf_size, int g_recieve_signal)
 {
 	static unsigned char	uc;
 	static size_t			count;
@@ -69,15 +67,22 @@ static void	recieve_bit(char *str, size_t *size, int g_recieve_signal)
 
 	if (count == 7)
 	{
-		str[i] = (char)uc;
-		if (str[i] == 0x04)
+		(*buf)[i] = (char)uc;
+		if ((*buf)[i] == 0x04)
 		{
-			printf("%s\n", str);
-			memset(str, '\0', *size);
+			(*buf)[i] = '\0';
+			printf("%s\n", *buf);
 			uc = 0;
 			count = 0;
 			i = 0;
 			return ;
+		}
+		if (i == *buf_size - 1)
+		{
+			*buf = buf_resize(*buf, *buf_size);
+			if (*buf == NULL)
+				exit(1);
+			*buf_size *= 2;
 		}
 		uc = 0;
 		count = 0;
@@ -89,9 +94,9 @@ static void	recieve_bit(char *str, size_t *size, int g_recieve_signal)
 	count++;
 }
 
-static void	exit_server(char *str)
+static void	exit_server(char *buf)
 {
-	free(str);
+	free(buf);
 	system("leaks server");
 	exit(0);
 }
@@ -101,8 +106,8 @@ int	main(void)
 	struct sigaction	sa;
 	sigset_t			block;
 	int					ret;
-	char				*str;
-	size_t				size;
+	char				*buf;
+	size_t				buf_size;
 
 	ret = sigemptyset(&block);
 	if (ret < 0)
@@ -124,19 +129,16 @@ int	main(void)
 		perror("sigaction");
 		exit(1);
 	}
-
 	if (sigaction(SIGUSR2, &sa, NULL) < 0)
 	{
 		perror("sigaction");
 		exit(1);
 	}
-
 	if (sigaction(SIGQUIT, &sa, NULL) < 0)
 	{
 		perror("sigaction");
 		exit(1);
 	}
-
 	if (sigaction(SIGINT, &sa, NULL) < 0)
 	{
 		perror("sigaction");
@@ -145,18 +147,18 @@ int	main(void)
 
 	printf("PID is [%ld]\n", (long)getpid());
 
-	size = 100;
-	str = (char *)malloc(sizeof(char) * size);
-	if (str == NULL)
+	buf_size = 1000;
+	buf = (char *)malloc(sizeof(char) * buf_size);
+	if (buf == NULL)
 		return (1);
-	memset(str, '\0', size);
+	memset(buf, '\0', buf_size);
 
 	while (1)
 	{
 		if (g_recieve_signal == SIGUSR1 || g_recieve_signal == SIGUSR2)
-			recieve_bit(str, &size, g_recieve_signal);
+			recieve_bit(&buf, &buf_size, g_recieve_signal);
 		if (g_recieve_signal == SIGQUIT || g_recieve_signal == SIGINT)
-			exit_server(str);
+			exit_server(buf);
 		pause();
 	}
 
