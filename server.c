@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/02 15:08:14 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/03 10:09:10 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,44 @@ static void	handle_signal(int signal)
 	g_recieve_signal = signal;
 }
 
-static void	recieve_bit(char *str, int g_recieve_signal)
+char	*str_resize(char *str, size_t size)
+{
+	char	*ret;
+	size_t	resize;
+	size_t	i;
+
+	if (str == NULL)
+		return (NULL);
+
+	if (SIZE_MAX - size < size)
+	{
+		free(str);
+		return (NULL);
+	}
+	resize = size * 2;
+	ret = (char *)malloc(sizeof(char) * resize);
+	if (ret == NULL)
+	{
+		free(str);
+		return (NULL);
+	}
+	memset(ret, '\0', resize);
+	i = 0;
+	while (i < size)
+	{
+		ret[i] = str[i];
+		i++;
+	}
+	ret[i] = '\0';
+	//free(str);
+	return (ret);
+}
+
+static void	recieve_bit(char *str, size_t *size, int g_recieve_signal)
 {
 	static unsigned char	uc;
-	static int				count;
-	static int				i;
+	static size_t			count;
+	static size_t			i;
 
 	if (g_recieve_signal == SIGUSR1)
 	{
@@ -37,11 +70,14 @@ static void	recieve_bit(char *str, int g_recieve_signal)
 	if (count == 7)
 	{
 		str[i] = (char)uc;
-		printf("%c\n", str[i]);
 		if (str[i] == 0x04)
 		{
 			printf("%s\n", str);
-			exit(0);
+			memset(str, '\0', *size);
+			uc = 0;
+			count = 0;
+			i = 0;
+			return ;
 		}
 		uc = 0;
 		count = 0;
@@ -56,6 +92,7 @@ static void	recieve_bit(char *str, int g_recieve_signal)
 static void	exit_server(char *str)
 {
 	free(str);
+	system("leaks server");
 	exit(0);
 }
 
@@ -65,6 +102,7 @@ int	main(void)
 	sigset_t			block;
 	int					ret;
 	char				*str;
+	size_t				size;
 
 	ret = sigemptyset(&block);
 	if (ret < 0)
@@ -93,21 +131,35 @@ int	main(void)
 		exit(1);
 	}
 
+	if (sigaction(SIGQUIT, &sa, NULL) < 0)
+	{
+		perror("sigaction");
+		exit(1);
+	}
+
+	if (sigaction(SIGINT, &sa, NULL) < 0)
+	{
+		perror("sigaction");
+		exit(1);
+	}
+
 	printf("PID is [%ld]\n", (long)getpid());
 
-	str = (char *)malloc(sizeof(char) * 10);
+	size = 100;
+	str = (char *)malloc(sizeof(char) * size);
 	if (str == NULL)
 		return (1);
-	memset(str, 0, 10);
+	memset(str, '\0', size);
 
 	while (1)
 	{
 		if (g_recieve_signal == SIGUSR1 || g_recieve_signal == SIGUSR2)
-			recieve_bit(str, g_recieve_signal);
+			recieve_bit(str, &size, g_recieve_signal);
 		if (g_recieve_signal == SIGQUIT || g_recieve_signal == SIGINT)
 			exit_server(str);
 		pause();
 	}
 
+	system("leaks server");
 	return (0);
 }
