@@ -6,7 +6,7 @@
 #    By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/02 09:43:13 by tsekiguc          #+#    #+#              #
-#    Updated: 2021/11/02 10:47:55 by tsekiguc         ###   ########.fr        #
+#    Updated: 2021/11/04 11:02:03 by tsekiguc         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,8 @@ CLIENT_OBJS		=	$(CLIENT_SRCS:.c=.o)
 
 CC				=	gcc
 CFLAGS			=	-Wall -Wextra -Werror
+INCLUDE			=	-I./libft
+LIB				=	-L./libft -lft
 
 RM				=	rm -f
 
@@ -31,20 +33,24 @@ RM				=	rm -f
 all				:	$(SERVER_NAME) $(CLIENT_NAME)
 
 $(SERVER_NAME)	:	$(SERVER_OBJS)
-					$(CC) $(CFLAGS) $^ -o $@
+					make -C libft
+					$(CC) $(CFLAGS) $(SERVER_OBJS) $(LIB) -o $@
 
 $(CLIENT_NAME)	:	$(CLIENT_OBJS)
-					$(CC) $(CFLAGS) $^ -o $@
+					make -C libft
+					$(CC) $(CFLAGS) $(CLIENT_OBJS) $(LIB) -o $@
 
 %.o				:	%.c
-					$(CC) $(CFLAGS) -c $< -o $@
+					$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 clean			:
+					make clean -C libft
 					$(RM) $(SERVER_OBJS)
 					$(RM) $(CLIENT_OBJS)
 
-fclean			:	clean
-					$(RM) $(SERVER_NAME) 
-					$(RM) $(CLIENT_NAME) 
+fclean			:
+					make fclean -C libft
+					$(RM) $(SERVER_OBJS) $(SERVER_NAME) 
+					$(RM) $(CLIENT_OBJS) $(CLIENT_NAME) 
 
 re				:	fclean all
