@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/05 15:18:22 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 15:36:01 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,32 +44,37 @@ char	*buf_resize(char *buf, size_t buf_size)
 	return (ret);
 }
 
-static void	recieve_bit(char **buf, size_t *buf_size, int g_recieve_signal)
+
+static void	signal_to_bit(unsigned char *uc, int signal)
+{
+	if (signal == SIGUSR1)
+	{
+		*uc |= 0;
+	}
+	else if (signal == SIGUSR2)
+	{
+		*uc |= 1;
+	}
+}
+
+
+static void	recieve_signal(char **buf, size_t *buf_size, int signal)
 {
 	static unsigned char	uc;
 	static size_t			count;
 	static size_t			i;
 
-	if (g_recieve_signal == SIGUSR1)
-	{
-		uc |= 0;
-	}
-	else if (g_recieve_signal == SIGUSR2)
-	{
-		uc |= 1;
-	}
+	signal_to_bit(&uc, signal);
 
 	if (count == 7)
 	{
 		(*buf)[i] = (char)uc;
 		if ((*buf)[i] == '\0')
 		{
-			write(1, *buf, strlen(*buf));
-			write(1, "\n", 1);
+			ft_putendl_fd(*buf, STDOUT_FILENO);
 			usleep(100);
 			if (kill(g_signal.pid, SIGUSR1) < 0)
 				exit(1);
-
 			ft_memset(*buf, '\0', *buf_size);
 			uc = 0;
 			count = 0;
@@ -139,7 +144,7 @@ static void	main_loop(char **buf, size_t *buf_size)
 	while (1)
 	{
 		if (g_signal.sig == SIGUSR1 || g_signal.sig == SIGUSR2)
-			recieve_bit(buf, buf_size, g_signal.sig);
+			recieve_signal(buf, buf_size, g_signal.sig);
 		if (g_signal.sig == SIGQUIT || g_signal.sig == SIGINT)
 			exit_server(buf);
 		pause();
