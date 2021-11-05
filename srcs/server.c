@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/05 14:32:58 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 15:02:28 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ static void error_exit(char *msg)
 	exit(1);
 }
 
-/*static void sig_block_set(struct sigaction *sa, sigset_t *block)
+static void sig_block_set(struct sigaction *sa, sigset_t *block)
 {
 	if ((sigemptyset(block) != 0)
 		|| (sigaddset(block, SIGUSR1) != 0)
@@ -125,7 +125,7 @@ static void error_exit(char *msg)
 		|| (sigaction(SIGQUIT, sa, NULL) < 0)
 		|| (sigaction(SIGINT, sa, NULL) < 0))
 		error_exit("sigaction error in main");
-}*/
+}
 
 /*static int	buf_init(char **buf, size_t *buf_size)
 {
@@ -144,7 +144,7 @@ static void	exit_server(char **buf)
 	exit(0);
 }
 
-/*static void	main_loop(char **buf, size_t *buf_size)
+static void	main_loop(char **buf, size_t *buf_size)
 {
 	while (1)
 	{
@@ -154,7 +154,7 @@ static void	exit_server(char **buf)
 			exit_server(buf);
 		pause();
 	}
-}*/
+}
 
 int	main(void)
 {
@@ -163,41 +163,19 @@ int	main(void)
 	char				*buf;
 	size_t				buf_size;
 
-	//sig_block_set(&sa, &block);
-	if ((sigemptyset(&block) != 0)
-		|| (sigaddset(&block, SIGUSR1) != 0)
-		|| (sigaddset(&block, SIGUSR2) != 0))
-		error_exit("sigset error in main");
-
 	ft_memset(&sa, '\0', sizeof(sa));
-	sa.sa_sigaction = &handle_signal;
-	sa.sa_mask = block;
-	sa.sa_flags = SA_SIGINFO | SA_RESTART;
-
-	if ((sigaction(SIGUSR1, &sa, NULL) < 0)
-		|| (sigaction(SIGUSR2, &sa, NULL) < 0)
-		|| (sigaction(SIGQUIT, &sa, NULL) < 0)
-		|| (sigaction(SIGINT, &sa, NULL) < 0))
-		error_exit("sigaction error in main");
+	sig_block_set(&sa, &block);
 	
 	printf("PID is [%d]\n", getpid());
 
-	//if (!buf_init(&buf, &buf_size))
-	//	error_exit("buf_init error in main");
+//	if (!buf_init(&buf, &buf_size))
+//		error_exit("buf_init error in main");
 	buf_size = BUF_SIZE;
 	buf = (char *)malloc(sizeof(char) * (buf_size));
 	if (buf == NULL)
 		return (1);
 	ft_memset(buf, '\0', buf_size);
 
-//	main_loop(&buf, &buf_size);
-	while (1)
-	{
-		if (g_signal.sig == SIGUSR1 || g_signal.sig == SIGUSR2)
-			recieve_bit(&buf, &buf_size, g_signal.sig);
-		if (g_signal.sig == SIGQUIT || g_signal.sig == SIGINT)
-			exit_server(&buf);
-		pause();
-	}
+	main_loop(&buf, &buf_size);
 	return (0);
 }
