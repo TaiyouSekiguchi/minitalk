@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 10:47:56 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/05 14:30:25 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 14:41:18 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,11 +54,19 @@ static void	handle_signal(int signal)
 {
 	if (signal == SIGUSR1)
 		ft_putendl_fd("ACK recieved ;)", STDOUT_FILENO);
+	exit(1);
+}
+
+static void	error_exit(char *msg)
+{
+	ft_putendl_fd(msg, STDERR_FILENO);
+	exit(1);
 }
 
 int	main(int argc, char *argv[])
 {
 	struct sigaction	sa;
+	sigset_t			block;
 	pid_t				pid;
 	size_t				i;
 
@@ -68,8 +76,13 @@ int	main(int argc, char *argv[])
 		return (0);
 	}
 
+	if ((sigemptyset(&block) != 0)
+		|| (sigaddset(&block, SIGUSR1) != 0))
+		error_exit("sigset error in main");
+
 	ft_memset(&sa, '\0', sizeof(sa));
 	sa.sa_handler = &handle_signal;
+	sa.sa_mask = block;
 	sa.sa_flags = SA_RESTART;
 
 	if (sigaction(SIGUSR1, &sa, NULL) < 0)
