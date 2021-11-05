@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/05 15:02:28 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 15:18:22 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,6 @@ char	*buf_resize(char *buf, size_t buf_size)
 {
 	char	*ret;
 	size_t	resize;
-	size_t	i;
-
-	if (buf == NULL)
-		return (NULL);
 
 	if (SIZE_MAX - buf_size <= buf_size)
 	{
@@ -43,13 +39,7 @@ char	*buf_resize(char *buf, size_t buf_size)
 		return (NULL);
 	}
 	ft_memset(ret, '\0', resize);
-	i = 0;
-	while (i < buf_size)
-	{
-		ret[i] = buf[i];
-		i++;
-	}
-	ret[i] = '\0';
+	ft_memcpy(ret, buf, buf_size);
 	free(buf);
 	return (ret);
 }
