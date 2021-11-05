@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 10:47:56 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/04 15:44:27 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 14:30:25 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,12 +37,16 @@ static void	send_bit(unsigned char sent_char, pid_t pid)
 				exit(1);
 			}
 		}
-		bit >>= 1;
 		if (usleep(100) < 0)
 		{
+			//int num;
+
 			ft_putendl_fd("usleep error in send bit", STDERR_FILENO);
+//			num = errno;
+//			perror("error is ");
 			exit(1);
 		}
+		bit >>= 1;
 	}
 }
 
@@ -71,7 +75,7 @@ int	main(int argc, char *argv[])
 	if (sigaction(SIGUSR1, &sa, NULL) < 0)
 	{
 		ft_putendl_fd("sigaction error in main", STDERR_FILENO);
-		exit(1);
+		return (1);
 	}
 
 	pid = (pid_t)ft_atoi(argv[1]);
