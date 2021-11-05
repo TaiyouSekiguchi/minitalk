@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/03 14:59:10 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 11:10:03 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ char	*buf_resize(char *buf, size_t buf_size)
 		free(buf);
 		return (NULL);
 	}
-	memset(ret, '\0', resize);
+	ft_memset(ret, '\0', resize);
 	i = 0;
 	while (i < buf_size)
 	{
@@ -103,75 +103,72 @@ static void	recieve_bit(char **buf, size_t *buf_size, int g_recieve_signal)
 	count++;
 }
 
-static void	exit_server(char *buf)
+static void	exit_server(char **buf)
 {
-	free(buf);
+	free(*buf);
 	system("leaks server");
 	exit(0);
+}
+
+static int	buf_init(char **buf, size_t *buf_size)
+{
+	*buf_size = BUF_SIZE;
+	*buf = (char *)malloc(sizeof(char) * (*buf_size));
+	if (*buf == NULL)
+		return (0);
+	ft_memset(*buf, '\0', *buf_size);
+	return (1);
+}
+
+static void error_exit(char *msg)
+{
+	ft_putendl_fd(msg, STDERR_FILENO);
+	exit(1);
+}
+
+static void	main_loop(char **buf, size_t *buf_size)
+{
+	while (1)
+	{
+		if (g_signal.sig == SIGUSR1 || g_signal.sig == SIGUSR2)
+			recieve_bit(buf, buf_size, g_signal.sig);
+		if (g_signal.sig == SIGQUIT || g_signal.sig == SIGINT)
+			exit_server(buf);
+		pause();
+	}
+}
+
+static void sig_block_set(struct sigaction *sa, sigset_t *block)
+{
+	if ((sigemptyset(block) != 0)
+		|| (sigaddset(block, SIGUSR1) != 0)
+		|| (sigaddset(block, SIGUSR2) != 0))
+		error_exit("sigset error in main");
+
+	sa->sa_sigaction = &handle_signal;
+	sa->sa_mask = *block;
+	sa->sa_flags = SA_SIGINFO | SA_RESTART;
+
+	if ((sigaction(SIGUSR1, sa, NULL) < 0)
+		|| (sigaction(SIGUSR2, sa, NULL) < 0)
+		|| (sigaction(SIGQUIT, sa, NULL) < 0)
+		|| (sigaction(SIGINT, sa, NULL) < 0))
+		error_exit("sigaction error in main");
 }
 
 int	main(void)
 {
 	struct sigaction	sa;
 	sigset_t			block;
-	int					ret;
 	char				*buf;
 	size_t				buf_size;
 
-	ret = sigemptyset(&block);
-	if (ret < 0)
-		return (1);
-	ret = sigaddset(&block, SIGUSR1);
-	if (ret < 0)
-		return (1);
-	ret = sigaddset(&block, SIGUSR2);
-	if (ret < 0)
-		return (1);
+	ft_memset(&sa, '\0', sizeof(sa));
+	sig_block_set(&sa, &block);
 
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_sigaction = &handle_signal;
-	sa.sa_mask = block;
-	sa.sa_flags = SA_SIGINFO;
-	sa.sa_flags |= SA_RESTART;
-
-	if (sigaction(SIGUSR1, &sa, NULL) < 0)
-	{
-		perror("sigaction");
-		exit(1);
-	}
-	if (sigaction(SIGUSR2, &sa, NULL) < 0)
-	{
-		perror("sigaction");
-		exit(1);
-	}
-	if (sigaction(SIGQUIT, &sa, NULL) < 0)
-	{
-		perror("sigaction");
-		exit(1);
-	}
-	if (sigaction(SIGINT, &sa, NULL) < 0)
-	{
-		perror("sigaction");
-		exit(1);
-	}
-
-	printf("PID is [%ld]\n", (long)getpid());
-
-	buf_size = 5;
-	buf = (char *)malloc(sizeof(char) * buf_size);
-	if (buf == NULL)
-		return (1);
-	memset(buf, '\0', buf_size);
-
-	while (1)
-	{
-		if (g_signal.sig == SIGUSR1 || g_signal.sig == SIGUSR2)
-			recieve_bit(&buf, &buf_size, g_signal.sig);
-		if (g_signal.sig == SIGQUIT || g_signal.sig == SIGINT)
-			exit_server(buf);
-		pause();
-	}
-
-	system("leaks server");
+	printf("PID is [%d]\n", getpid());
+	if (!buf_init(&buf, &buf_size))
+		error_exit("buf_init error in main");
+	main_loop(&buf, &buf_size);
 	return (0);
 }

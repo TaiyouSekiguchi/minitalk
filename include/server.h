@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/02 14:45:36 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/04 10:19:42 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 11:09:08 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <unistd.h>
 # include "libft.h"
 
+# define BUF_SIZE 10
 
 typedef struct	s_signal
 {

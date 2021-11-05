@@ -6,7 +6,7 @@
 #    By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/02 09:43:13 by tsekiguc          #+#    #+#              #
-#    Updated: 2021/11/04 11:02:03 by tsekiguc         ###   ########.fr        #
+#    Updated: 2021/11/05 11:07:11 by tsekiguc         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ CLIENT_OBJS		=	$(CLIENT_SRCS:.c=.o)
 
 CC				=	gcc
 CFLAGS			=	-Wall -Wextra -Werror
-INCLUDE			=	-I./libft
+INCLUDE			=	-I include
 LIB				=	-L./libft -lft
 
 RM				=	rm -f
@@ -29,6 +29,9 @@ RM				=	rm -f
 .SUFFIXES		:	.c .o
 
 .PHONY			:	all clean fclean re
+
+vpath %.c srcs
+vpath %.h include
 
 all				:	$(SERVER_NAME) $(CLIENT_NAME)
 
