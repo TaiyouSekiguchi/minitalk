@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/05 15:36:01 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/05 16:35:44 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ char	*buf_resize(char *buf, size_t buf_size)
 	return (ret);
 }
 
-
 static void	signal_to_bit(unsigned char *uc, int signal)
 {
 	if (signal == SIGUSR1)
@@ -57,6 +56,23 @@ static void	signal_to_bit(unsigned char *uc, int signal)
 	}
 }
 
+static void	recieve_fin(char *buf, size_t buf_size, pid_t c_pid, size_t *i)
+{
+	ft_putendl_fd(buf, STDOUT_FILENO);
+	usleep(100);
+	if (kill(c_pid, SIGUSR1) < 0)
+		exit(1);
+	ft_memset(buf, '\0', buf_size);
+	*i = 0;
+}
+
+static void	do_buf_resize(char **buf, size_t *buf_size)
+{
+	*buf = buf_resize(*buf, *buf_size);
+	if (*buf == NULL)
+		exit(1);
+	*buf_size *= 2;
+}
 
 static void	recieve_signal(char **buf, size_t *buf_size, int signal)
 {
@@ -65,35 +81,21 @@ static void	recieve_signal(char **buf, size_t *buf_size, int signal)
 	static size_t			i;
 
 	signal_to_bit(&uc, signal);
-
 	if (count == 7)
 	{
 		(*buf)[i] = (char)uc;
 		if ((*buf)[i] == '\0')
+			recieve_fin(*buf, *buf_size, g_signal.pid, &i);
+		else
 		{
-			ft_putendl_fd(*buf, STDOUT_FILENO);
-			usleep(100);
-			if (kill(g_signal.pid, SIGUSR1) < 0)
-				exit(1);
-			ft_memset(*buf, '\0', *buf_size);
-			uc = 0;
-			count = 0;
-			i = 0;
-			return ;
-		}
-		if (i == *buf_size - 1)
-		{
-			*buf = buf_resize(*buf, *buf_size);
-			if (*buf == NULL)
-				exit(1);
-			*buf_size *= 2;
+			if (i == *buf_size - 1)
+				do_buf_resize(buf, buf_size);
+			i++;
 		}
 		uc = 0;
 		count = 0;
-		i++;
 		return ;
 	}
-
 	uc <<= 1;
 	count++;
 }
@@ -104,7 +106,7 @@ static void error_exit(char *msg)
 	exit(1);
 }
 
-static void sig_block_set(struct sigaction *sa, sigset_t *block)
+static void sigaction_set(struct sigaction *sa, sigset_t *block)
 {
 	if ((sigemptyset(block) != 0)
 		|| (sigaddset(block, SIGUSR1) != 0)
@@ -122,7 +124,7 @@ static void sig_block_set(struct sigaction *sa, sigset_t *block)
 		error_exit("sigaction error in main");
 }
 
-/*static int	buf_init(char **buf, size_t *buf_size)
+static int	buf_init(char **buf, size_t *buf_size)
 {
 	*buf_size = BUF_SIZE;
 	*buf = (char *)malloc(sizeof(char) * (*buf_size));
@@ -130,7 +132,7 @@ static void sig_block_set(struct sigaction *sa, sigset_t *block)
 		return (0);
 	ft_memset(*buf, '\0', *buf_size);
 	return (1);
-}*/
+}
 
 static void	exit_server(char **buf)
 {
@@ -159,17 +161,12 @@ int	main(void)
 	size_t				buf_size;
 
 	ft_memset(&sa, '\0', sizeof(sa));
-	sig_block_set(&sa, &block);
+	sigaction_set(&sa, &block);
 	
 	printf("PID is [%d]\n", getpid());
 
-//	if (!buf_init(&buf, &buf_size))
-//		error_exit("buf_init error in main");
-	buf_size = BUF_SIZE;
-	buf = (char *)malloc(sizeof(char) * (buf_size));
-	if (buf == NULL)
-		return (1);
-	ft_memset(buf, '\0', buf_size);
+	if (!buf_init(&buf, &buf_size))
+		error_exit("buf_init error in main");
 
 	main_loop(&buf, &buf_size);
 	return (0);
