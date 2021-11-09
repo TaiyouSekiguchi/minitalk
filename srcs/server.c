@@ -6,7 +6,7 @@
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/05 16:35:44 by tsekiguc         ###   ########.fr       */
+/*   Updated: 2021/11/09 11:29:30 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,18 @@ static void	signal_to_bit(unsigned char *uc, int signal)
 static void	recieve_fin(char *buf, size_t buf_size, pid_t c_pid, size_t *i)
 {
 	ft_putendl_fd(buf, STDOUT_FILENO);
-	usleep(100);
-	if (kill(c_pid, SIGUSR1) < 0)
+	if (usleep(100) < 0)
+	{
+		ft_putendl_fd("usleep error in recieve_fin", STDERR_FILENO);
+		free(buf);
 		exit(1);
+	}
+	if (kill(c_pid, SIGUSR1) < 0)
+	{
+		ft_putendl_fd("kill error in recieve_fin", STDERR_FILENO);
+		free(buf);
+		exit(1);
+	}
 	ft_memset(buf, '\0', buf_size);
 	*i = 0;
 }
@@ -70,7 +79,10 @@ static void	do_buf_resize(char **buf, size_t *buf_size)
 {
 	*buf = buf_resize(*buf, *buf_size);
 	if (*buf == NULL)
+	{
+		ft_putendl_fd("buf_resize error in do_buf_resize", STDERR_FILENO);
 		exit(1);
+	}
 	*buf_size *= 2;
 }
 
@@ -162,7 +174,7 @@ int	main(void)
 
 	ft_memset(&sa, '\0', sizeof(sa));
 	sigaction_set(&sa, &block);
-	
+
 	printf("PID is [%d]\n", getpid());
 
 	if (!buf_init(&buf, &buf_size))
