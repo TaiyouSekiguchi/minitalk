@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   ft_putstr_fd.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/07/16 11:14:09 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/07/16 11:14:13 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "libft.h"
 
-# include <signal.h>
-# include "libft.h"
-
-#endif
+void	ft_putstr_fd(char *s, int fd)
+{
+	if (s != NULL)
+		write(fd, s, ft_strlen(s));
+}

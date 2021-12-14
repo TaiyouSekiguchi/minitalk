@@ -1,19 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   server_error.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/09/10 09:21:13 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/11/09 16:04:18 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "server.h"
 
-# include <signal.h>
-# include "libft.h"
+void	error_exit(char *msg)
+{
+	ft_putendl_fd(msg, STDERR_FILENO);
+	exit(1);
+}
 
-#endif
+void	error_free_exit(char *msg, char *buf)
+{
+	ft_putendl_fd(msg, STDERR_FILENO);
+	free(buf);
+	exit(1);
+}

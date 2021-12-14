@@ -1,19 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   ft_lstiter.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/07/16 11:37:20 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/07/16 11:37:41 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "libft.h"
 
-# include <signal.h>
-# include "libft.h"
+void	ft_lstiter(t_list *lst, void (*f)(void *))
+{
+	t_list	*current;
 
-#endif
+	if (lst == NULL)
+		return ;
+	current = lst;
+	while (current != NULL)
+	{
+		(*f)(current->content);
+		current = current->next;
+	}
+}

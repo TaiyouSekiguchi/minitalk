@@ -1,19 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   ft_isspace.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/10/21 11:43:21 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/10/21 11:43:23 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "libft.h"
 
-# include <signal.h>
-# include "libft.h"
+int	ft_isspace(int c)
+{
+	char	cc;
 
-#endif
+	cc = (char)c;
+	if (cc == '\t' || cc == '\n' || cc == '\v' || cc == '\f'
+		|| cc == '\r' || cc == ' ')
+		return (1);
+	return (0);
+}

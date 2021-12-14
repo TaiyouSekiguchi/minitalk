@@ -6,16 +6,19 @@
 #    By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/02 09:43:13 by tsekiguc          #+#    #+#              #
-#    Updated: 2021/11/05 11:07:11 by tsekiguc         ###   ########.fr        #
+#    Updated: 2021/11/11 15:16:58 by tsekiguc         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SERVER_NAME		=	server
-SERVER_SRCS		=	server.c
+SERVER_SRCS		=	server_main.c\
+					server_buf.c\
+					server_error.c\
+					server_recieve_signal.c
 SERVER_OBJS		=	$(SERVER_SRCS:.c=.o)
 
 CLIENT_NAME		=	client
-CLIENT_SRCS		=	client.c
+CLIENT_SRCS		=	client_main.c
 CLIENT_OBJS		=	$(CLIENT_SRCS:.c=.o)
 
 CC				=	gcc
@@ -24,9 +27,6 @@ INCLUDE			=	-I include
 LIB				=	-L./libft -lft
 
 RM				=	rm -f
-
-.SUFFIXES		:
-.SUFFIXES		:	.c .o
 
 .PHONY			:	all clean fclean re
 
@@ -43,7 +43,10 @@ $(CLIENT_NAME)	:	$(CLIENT_OBJS)
 					make -C libft
 					$(CC) $(CFLAGS) $(CLIENT_OBJS) $(LIB) -o $@
 
-%.o				:	%.c
+$(SERVER_OBJS)	:	%.o	:	%.c include/server.h
+					$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(CLIENT_OBJS)	:	%.o	:	%.c include/client.h
 					$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 clean			:

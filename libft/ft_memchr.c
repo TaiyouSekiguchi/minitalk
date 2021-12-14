@@ -1,19 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   ft_memchr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/07/14 19:23:30 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/07/14 19:24:44 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "libft.h"
 
-# include <signal.h>
-# include "libft.h"
+void	*ft_memchr(const void *s, int c, size_t n)
+{
+	unsigned char	*ucs;
+	unsigned char	ucc;
+	size_t			i;
 
-#endif
+	ucs = (unsigned char *)s;
+	ucc = (unsigned char)c;
+	i = 0;
+	while (i < n)
+	{
+		if (ucs[i] == ucc)
+			return (&ucs[i]);
+		i++;
+	}
+	return (NULL);
+}

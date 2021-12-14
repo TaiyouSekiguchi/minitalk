@@ -1,19 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   ft_strlcat.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/07/14 19:35:11 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/07/14 19:36:26 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "libft.h"
 
-# include <signal.h>
-# include "libft.h"
+size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
+{
+	size_t	d_len;
+	size_t	s_len;
+	size_t	i;
 
-#endif
+	d_len = ft_strlen(dst);
+	s_len = ft_strlen(src);
+	if (d_len >= dstsize)
+		return (dstsize + s_len);
+	i = 0;
+	while (src[i] != '\0' && i < dstsize - d_len - 1)
+	{
+		dst[d_len + i] = src[i];
+		i++;
+	}
+	dst[d_len + i] = '\0';
+	return (d_len + s_len);
+}

@@ -1,19 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   ft_long_check.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/10/21 11:43:05 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/11/04 14:52:45 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "libft.h"
 
-# include <signal.h>
-# include "libft.h"
+int	ft_long_check(unsigned long num, unsigned long add, int minus)
+{
+	unsigned long	num_limit;
+	unsigned long	add_limit;
+	unsigned long	max;
 
-#endif
+	max = LONG_MAX;
+	if (minus == 1)
+		max++;
+	num_limit = max / 10;
+	add_limit = max % 10;
+	if (num > num_limit
+		|| (num == num_limit && add > add_limit))
+		return (0);
+	return (1);
+}

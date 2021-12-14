@@ -1,19 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.h                                           :+:      :+:    :+:   */
+/*   ft_strchr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tsekiguc <tsekiguc@student.42tokyo.jp      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/02 14:34:53 by tsekiguc          #+#    #+#             */
-/*   Updated: 2021/11/10 15:44:47 by tsekiguc         ###   ########.fr       */
+/*   Created: 2021/07/14 19:36:55 by tsekiguc          #+#    #+#             */
+/*   Updated: 2021/07/15 12:00:15 by tsekiguc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CLIENT_H
-# define CLIENT_H
+#include "libft.h"
 
-# include <signal.h>
-# include "libft.h"
+char	*ft_strchr(const char *s, int c)
+{
+	char	*ret;
+	char	cc;
+	size_t	len;
+	size_t	i;
 
-#endif
+	ret = (char *)s;
+	cc = (char)c;
+	len = ft_strlen(s);
+	i = 0;
+	while (i <= len)
+	{
+		if (ret[i] == cc)
+			return (&ret[i]);
+		i++;
+	}
+	return (NULL);
+}
